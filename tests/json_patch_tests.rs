@@ -6,7 +6,9 @@ use cjson::utils::{
     apply_patches, apply_patches_case_sensitive, generate_patches, generate_patches_case_sensitive,
 };
 fn load_test_data(filename: &str) -> cjson::Value {
-    let path = std::path::Path::new("/tmp/cJSON/tests/json-patch-tests").join(filename);
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/data/json-patch-tests")
+        .join(filename);
     let content = std::fs::read_to_string(&path)
         .unwrap_or_else(|_| panic!("Failed to read test file: {:?}", path));
     parse(&content).unwrap_or_else(|e| panic!("Failed to parse test file {}: {}", filename, e))
