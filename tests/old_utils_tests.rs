@@ -1,10 +1,11 @@
+#![cfg(feature = "utils")]
+
 use cjson::parse;
 use cjson::to_string_minified;
 use cjson::utils::{
-    find_pointer_from_object_to, get_pointer, get_pointer_case_sensitive,
-    merge_patch, merge_patch_case_sensitive,
-    generate_merge_patch, generate_merge_patch_case_sensitive,
-    sort_object, sort_object_case_sensitive,
+    find_pointer_from_object_to, generate_merge_patch, generate_merge_patch_case_sensitive,
+    get_pointer, get_pointer_case_sensitive, merge_patch, merge_patch_case_sensitive, sort_object,
+    sort_object_case_sensitive,
 };
 
 fn parse_json(s: &str) -> cjson::Value {
@@ -61,10 +62,16 @@ fn find_pointer_from_object_to_test() {
     let root = parse_json(json);
 
     let num6 = get_pointer(&root, "/numbers/6").unwrap();
-    assert_eq!(find_pointer_from_object_to(&root, num6), Some("/numbers/6".into()));
+    assert_eq!(
+        find_pointer_from_object_to(&root, num6),
+        Some("/numbers/6".into())
+    );
 
     let nums = get_pointer(&root, "/numbers").unwrap();
-    assert_eq!(find_pointer_from_object_to(&root, nums), Some("/numbers".into()));
+    assert_eq!(
+        find_pointer_from_object_to(&root, nums),
+        Some("/numbers".into())
+    );
 
     assert_eq!(find_pointer_from_object_to(&root, &root), Some("".into()));
 }
@@ -73,11 +80,17 @@ fn find_pointer_from_object_to_test() {
 fn find_pointer_escaped_tilde_slash() {
     let root = parse_json(r#"{"m~n": "value"}"#);
     let target = get_pointer(&root, "/m~0n").unwrap();
-    assert_eq!(find_pointer_from_object_to(&root, target), Some("/m~0n".into()));
+    assert_eq!(
+        find_pointer_from_object_to(&root, target),
+        Some("/m~0n".into())
+    );
 
     let root2 = parse_json(r#"{"m/n": "value"}"#);
     let target2 = get_pointer(&root2, "/m~1n").unwrap();
-    assert_eq!(find_pointer_from_object_to(&root2, target2), Some("/m~1n".into()));
+    assert_eq!(
+        find_pointer_from_object_to(&root2, target2),
+        Some("/m~1n".into())
+    );
 }
 
 // ---- Sort Tests ----
@@ -88,7 +101,10 @@ fn sort_object_sorts_keys() {
     let random = "QWERTYUIOPASDFGHJKLZXCVBNM";
     let mut map = std::collections::BTreeMap::new();
     for c in random.chars() {
-        map.insert(c.to_string(), cjson::Value::Number(cjson::Number::from_i64(1)));
+        map.insert(
+            c.to_string(),
+            cjson::Value::Number(cjson::Number::from_i64(1)),
+        );
     }
     let mut v = cjson::Value::Object(map);
     sort_object(&mut v);
@@ -113,7 +129,11 @@ const MERGE_TESTS: &[(&str, &str, &str)] = &[
     (r#"{"a":"b","b":"c"}"#, r#"{"a":null}"#, r#"{"b":"c"}"#),
     (r#"{"a":["b"]}"#, r#"{"a":"c"}"#, r#"{"a":"c"}"#),
     (r#"{"a":"c"}"#, r#"{"a":["b"]}"#, r#"{"a":["b"]}"#),
-    (r#"{"a":{"b":"c"}}"#, r#"{"a":{"b":"d","c":null}}"#, r#"{"a":{"b":"d"}}"#),
+    (
+        r#"{"a":{"b":"c"}}"#,
+        r#"{"a":{"b":"d","c":null}}"#,
+        r#"{"a":{"b":"d"}}"#,
+    ),
     (r#"{"a":[{"b":"c"}]}"#, r#"{"a":[1]}"#, r#"{"a":[1]}"#),
     (r#"["a","b"]"#, r#"["c","d"]"#, r#"["c","d"]"#),
     (r#"{"a":"b"}"#, r#"["c"]"#, r#"["c"]"#),
@@ -121,7 +141,11 @@ const MERGE_TESTS: &[(&str, &str, &str)] = &[
     (r#"{"a":"foo"}"#, r#""bar""#, r#""bar""#),
     (r#"{"e":null}"#, r#"{"a":1}"#, r#"{"a":1,"e":null}"#),
     (r#"[1,2]"#, r#"{"a":"b","c":null}"#, r#"{"a":"b"}"#),
-    (r#"{}"#, r#"{"a":{"bb":{"ccc":null}}}"#, r#"{"a":{"bb":{}}}"#),
+    (
+        r#"{}"#,
+        r#"{"a":{"bb":{"ccc":null}}}"#,
+        r#"{"a":{"bb":{}}}"#,
+    ),
 ];
 
 #[test]
@@ -131,7 +155,11 @@ fn merge_patch_tests() {
         let patch = parse_json(patch_str);
         merge_patch(&mut target, &patch);
         let result = to_string_minified(&target);
-        assert_eq!(result, *expected, "merge test {} failed: {} + {} != {}", i, from, patch_str, expected);
+        assert_eq!(
+            result, *expected,
+            "merge test {} failed: {} + {} != {}",
+            i, from, patch_str, expected
+        );
     }
 }
 

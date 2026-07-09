@@ -1,8 +1,8 @@
+use crate::Value;
 use alloc::collections::BTreeMap;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::fmt::Write;
-use crate::Value;
 
 /// Options for JSON printing.
 pub struct PrintOptions {
@@ -12,7 +12,10 @@ pub struct PrintOptions {
 
 impl Default for PrintOptions {
     fn default() -> Self {
-        PrintOptions { indent: 2, sort_keys: false }
+        PrintOptions {
+            indent: 2,
+            sort_keys: false,
+        }
     }
 }
 
@@ -78,13 +81,7 @@ fn print_string(s: &str, out: &mut String) {
     out.push('"');
 }
 
-fn print_array(
-    arr: &[Value],
-    out: &mut String,
-    depth: usize,
-    indent: usize,
-    sort_keys: bool,
-) {
+fn print_array(arr: &[Value], out: &mut String, depth: usize, indent: usize, sort_keys: bool) {
     out.push('[');
     if arr.is_empty() {
         out.push(']');
@@ -159,8 +156,8 @@ fn write_newline_indent(out: &mut String, depth: usize, indent: usize) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloc::vec;
     use crate::Number;
+    use alloc::vec;
 
     #[test]
     fn test_null() {
@@ -189,6 +186,7 @@ mod tests {
 
     #[test]
     fn test_number_float() {
+        #[allow(clippy::approx_constant)]
         let v = Value::Number(3.14.into());
         let s = to_string_minified(&v);
         assert!(s.starts_with("3.14"), "got {s}");
@@ -201,16 +199,16 @@ mod tests {
 
     #[test]
     fn test_string_hello() {
-        assert_eq!(to_string_minified(&Value::String("hello".into())), "\"hello\"");
+        assert_eq!(
+            to_string_minified(&Value::String("hello".into())),
+            "\"hello\""
+        );
     }
 
     #[test]
     fn test_string_escapes() {
         let s = Value::String("\"\\/\x08\x0C\n\r\t".into());
-        assert_eq!(
-            to_string_minified(&s),
-            r#""\"\\/\b\f\n\r\t""#
-        );
+        assert_eq!(to_string_minified(&s), r#""\"\\/\b\f\n\r\t""#);
     }
 
     #[test]
@@ -295,7 +293,10 @@ mod tests {
         let v = Value::Object(map);
         // BTreeMap is already sorted by key
         assert_eq!(to_string_minified(&v), r#"{"one":1,"three":3,"two":2}"#);
-        assert_eq!(to_string(&v), "{\n  \"one\": 1,\n  \"three\": 3,\n  \"two\": 2\n}");
+        assert_eq!(
+            to_string(&v),
+            "{\n  \"one\": 1,\n  \"three\": 3,\n  \"two\": 2\n}"
+        );
     }
 
     #[test]
@@ -303,14 +304,27 @@ mod tests {
         let mut inner = BTreeMap::new();
         inner.insert("x".into(), Value::Number(2.into()));
         let mut outer = BTreeMap::new();
-        outer.insert("arr".into(), Value::Array(vec![Value::Number(1.into()), Value::Object(inner)]));
+        outer.insert(
+            "arr".into(),
+            Value::Array(vec![Value::Number(1.into()), Value::Object(inner)]),
+        );
         let v = Value::Object(outer);
         assert_eq!(to_string_minified(&v), r#"{"arr":[1,{"x":2}]}"#);
     }
 
     #[test]
     fn test_roundtrip_simple() {
-        let cases = vec!["null", "true", "false", "42", "-17", "3.14", r#""hello""#, "[]", "{}"];
+        let cases = vec![
+            "null",
+            "true",
+            "false",
+            "42",
+            "-17",
+            "3.14",
+            r#""hello""#,
+            "[]",
+            "{}",
+        ];
         for input in cases {
             let parsed = crate::parse(input).unwrap();
             let printed = to_string_minified(&parsed);
@@ -336,7 +350,10 @@ mod tests {
         map.insert("m".into(), Value::Number(3.into()));
         let v = Value::Object(map);
         // Without sort_keys, BTreeMap is already sorted by key
-        let opts = PrintOptions { indent: 2, sort_keys: true };
+        let opts = PrintOptions {
+            indent: 2,
+            sort_keys: true,
+        };
         let s = to_string_with_options(&v, opts);
         assert_eq!(s, "{\n  \"a\": 2,\n  \"m\": 3,\n  \"z\": 1\n}");
     }
@@ -346,7 +363,10 @@ mod tests {
         let mut map = BTreeMap::new();
         map.insert("a".into(), Value::Number(1.into()));
         let v = Value::Object(map);
-        let opts = PrintOptions { indent: 0, sort_keys: false };
+        let opts = PrintOptions {
+            indent: 0,
+            sort_keys: false,
+        };
         assert_eq!(to_string_with_options(&v, opts), r#"{"a":1}"#);
     }
 

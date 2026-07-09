@@ -1,4 +1,4 @@
-use cjson::{Number, to_string_minified, Value};
+use cjson::{to_string_minified, Number, Value};
 
 #[test]
 fn print_number_should_print_zero() {
@@ -8,22 +8,48 @@ fn print_number_should_print_zero() {
 
 #[test]
 fn print_number_should_print_negative_integers() {
-    assert_eq!(to_string_minified(&Value::Number(Number::from_i64(-1))), "-1");
-    assert_eq!(to_string_minified(&Value::Number(Number::from_i64(-32768))), "-32768");
-    assert_eq!(to_string_minified(&Value::Number(Number::from_i64(-2147483648))), "-2147483648");
+    assert_eq!(
+        to_string_minified(&Value::Number(Number::from_i64(-1))),
+        "-1"
+    );
+    assert_eq!(
+        to_string_minified(&Value::Number(Number::from_i64(-32768))),
+        "-32768"
+    );
+    assert_eq!(
+        to_string_minified(&Value::Number(Number::from_i64(-2147483648))),
+        "-2147483648"
+    );
 }
 
 #[test]
 fn print_number_should_print_positive_integers() {
     assert_eq!(to_string_minified(&Value::Number(Number::from_i64(1))), "1");
-    assert_eq!(to_string_minified(&Value::Number(Number::from_i64(32767))), "32767");
-    assert_eq!(to_string_minified(&Value::Number(Number::from_i64(2147483647))), "2147483647");
+    assert_eq!(
+        to_string_minified(&Value::Number(Number::from_i64(32767))),
+        "32767"
+    );
+    assert_eq!(
+        to_string_minified(&Value::Number(Number::from_i64(2147483647))),
+        "2147483647"
+    );
 }
 
 #[test]
 fn print_number_should_print_float_values() {
     // Parse and re-print to verify round-trip of various number representations
-    let cases = ["0", "1", "-1", "3.14", "1.5e2", "1e-09", "1.23e+129", "1.23e-126", "0.123", "-0.0123"];
+    let cases = [
+        "0",
+        "1",
+        "-1",
+        "3.14",
+        "1.5e2",
+        "1e-09",
+        "1.23e+129",
+        "1.23e-126",
+        "0.123",
+        "-0.0123",
+    ];
     for input in cases {
         let parsed = cjson::parse(input).expect("should parse");
         let printed = to_string_minified(&parsed);
@@ -35,7 +61,10 @@ fn print_number_should_print_float_values() {
         let b = reparsed.as_f64().unwrap();
         let diff = (a - b).abs();
         let rel = diff / a.abs().max(1.0);
-        assert!(diff < 1e-10 || rel < 1e-10, "round-trip {input} -> {printed}: values differ {a} vs {b}");
+        assert!(
+            diff < 1e-10 || rel < 1e-10,
+            "round-trip {input} -> {printed}: values differ {a} vs {b}"
+        );
     }
 }
 

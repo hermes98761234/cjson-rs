@@ -1,6 +1,6 @@
+use crate::Value;
 use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
-use crate::Value;
 
 /// Apply a JSON Merge Patch (RFC 7396) to a target value.
 ///

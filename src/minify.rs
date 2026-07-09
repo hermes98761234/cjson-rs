@@ -8,12 +8,20 @@ pub fn minify(input: &str) -> String {
     for c in input.chars() {
         if in_string {
             out.push(c);
-            if escape { escape = false; }
-            else if c == '\\' { escape = true; }
-            else if c == '"' { in_string = false; }
+            if escape {
+                escape = false;
+            } else if c == '\\' {
+                escape = true;
+            } else if c == '"' {
+                in_string = false;
+            }
         } else {
-            if c == '"' { in_string = true; out.push(c); }
-            else if !c.is_ascii_whitespace() { out.push(c); }
+            if c == '"' {
+                in_string = true;
+                out.push(c);
+            } else if !c.is_ascii_whitespace() {
+                out.push(c);
+            }
         }
     }
     out

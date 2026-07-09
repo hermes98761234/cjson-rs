@@ -1,10 +1,10 @@
+#![cfg(feature = "utils")]
+
 use cjson::utils::{
-    add_patch_to_array, apply_patches, apply_patches_case_sensitive,
-    find_pointer_from_object_to, generate_merge_patch, generate_merge_patch_case_sensitive,
-    generate_patches, generate_patches_case_sensitive,
-    get_pointer, get_pointer_case_sensitive,
-    merge_patch, merge_patch_case_sensitive,
-    sort_object, sort_object_case_sensitive,
+    add_patch_to_array, apply_patches, apply_patches_case_sensitive, find_pointer_from_object_to,
+    generate_merge_patch, generate_merge_patch_case_sensitive, generate_patches,
+    generate_patches_case_sensitive, get_pointer, get_pointer_case_sensitive, merge_patch,
+    merge_patch_case_sensitive, sort_object, sort_object_case_sensitive,
 };
 
 /// Test that utils functions don't crash with null/invalid inputs.

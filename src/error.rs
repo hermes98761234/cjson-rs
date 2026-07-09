@@ -10,13 +10,22 @@ pub struct Error {
 
 impl Error {
     pub fn new(kind: ErrorKind, position: usize, line: usize, column: usize) -> Self {
-        Error { kind, position, line, column }
+        Error {
+            kind,
+            position,
+            line,
+            column,
+        }
     }
 }
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} at pos {} (line {}, col {})", self.kind, self.position, self.line, self.column)
+        write!(
+            f,
+            "{} at pos {} (line {}, col {})",
+            self.kind, self.position, self.line, self.column
+        )
     }
 }
 
@@ -39,7 +48,9 @@ pub enum ErrorKind {
 impl fmt::Display for ErrorKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ErrorKind::UnexpectedToken { expected, found } => write!(f, "expected {expected}, found '{found}'"),
+            ErrorKind::UnexpectedToken { expected, found } => {
+                write!(f, "expected {expected}, found '{found}'")
+            }
             ErrorKind::UnexpectedEndOfInput => write!(f, "unexpected end of input"),
             ErrorKind::InvalidNumber => write!(f, "invalid number"),
             ErrorKind::InvalidStringEscape => write!(f, "invalid string escape"),

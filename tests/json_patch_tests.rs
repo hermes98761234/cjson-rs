@@ -1,10 +1,10 @@
+#![cfg(feature = "utils")]
+
 use cjson::parse;
 use cjson::to_string_minified;
 use cjson::utils::{
-    apply_patches, apply_patches_case_sensitive,
-    generate_patches, generate_patches_case_sensitive,
+    apply_patches, apply_patches_case_sensitive, generate_patches, generate_patches_case_sensitive,
 };
-
 fn load_test_data(filename: &str) -> cjson::Value {
     let path = std::path::Path::new("/tmp/cJSON/tests/json-patch-tests").join(filename);
     let content = std::fs::read_to_string(&path)
@@ -79,7 +79,10 @@ fn test_generate_patch(test: &cjson::Value) -> bool {
     if !cjson::compare(&object, expected, true) {
         let got = to_string_minified(&object);
         let exp = to_string_minified(expected);
-        eprintln!("  Generated patch FAILED: got '{}', expected '{}'", got, exp);
+        eprintln!(
+            "  Generated patch FAILED: got '{}', expected '{}'",
+            got, exp
+        );
         return false;
     }
     true

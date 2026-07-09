@@ -1,8 +1,8 @@
+use crate::Value;
 use alloc::collections::BTreeMap;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::fmt;
-use crate::Value;
 
 /// Error type for JSON Patch operations.
 #[derive(Clone, Debug, PartialEq)]
@@ -76,10 +76,18 @@ pub fn add_patch_to_array(array: &mut Value, op: &str, path: &str, value: &Value
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-fn apply_patches_inner(root: &mut Value, patches: &Value, case_sensitive: bool) -> Result<(), PatchError> {
+fn apply_patches_inner(
+    root: &mut Value,
+    patches: &Value,
+    case_sensitive: bool,
+) -> Result<(), PatchError> {
     let arr = match patches {
         Value::Array(a) => a,
-        _ => return Err(PatchError { kind: PatchErrorKind::InvalidPatch }),
+        _ => {
+            return Err(PatchError {
+                kind: PatchErrorKind::InvalidPatch,
+            })
+        }
     };
     for patch in arr {
         apply_single_patch(root, patch, case_sensitive)?;
@@ -87,13 +95,25 @@ fn apply_patches_inner(root: &mut Value, patches: &Value, case_sensitive: bool) 
     Ok(())
 }
 
-fn apply_single_patch(root: &mut Value, patch: &Value, case_sensitive: bool) -> Result<(), PatchError> {
+fn apply_single_patch(
+    root: &mut Value,
+    patch: &Value,
+    case_sensitive: bool,
+) -> Result<(), PatchError> {
     let obj = match patch {
         Value::Object(m) => m,
-        _ => return Err(PatchError { kind: PatchErrorKind::InvalidPatch }),
+        _ => {
+            return Err(PatchError {
+                kind: PatchErrorKind::InvalidPatch,
+            })
+        }
     };
-    let op = get_string_field(obj, "op").ok_or(PatchError { kind: PatchErrorKind::InvalidPatch })?;
-    let path = get_string_field(obj, "path").ok_or(PatchError { kind: PatchErrorKind::InvalidPatch })?;
+    let op = get_string_field(obj, "op").ok_or(PatchError {
+        kind: PatchErrorKind::InvalidPatch,
+    })?;
+    let path = get_string_field(obj, "path").ok_or(PatchError {
+        kind: PatchErrorKind::InvalidPatch,
+    })?;
     match op {
         "add" => apply_add(root, path, obj, case_sensitive),
         "remove" => apply_remove(root, path, case_sensitive),
@@ -101,7 +121,9 @@ fn apply_single_patch(root: &mut Value, patch: &Value, case_sensitive: bool) -> 
         "move" => apply_move(root, path, obj, case_sensitive),
         "copy" => apply_copy(root, path, obj, case_sensitive),
         "test" => apply_test(root, path, obj, case_sensitive),
-        _ => Err(PatchError { kind: PatchErrorKind::UnknownOperation }),
+        _ => Err(PatchError {
+            kind: PatchErrorKind::UnknownOperation,
+        }),
     }
 }
 
@@ -222,20 +244,32 @@ where
     F: FnOnce(&mut Value, &str) -> Result<(), PatchError>,
 {
     if path.is_empty() {
-        return Err(PatchError { kind: PatchErrorKind::PathNotFound });
+        return Err(PatchError {
+            kind: PatchErrorKind::PathNotFound,
+        });
     }
     let (parent_path, child) = split_pointer(path);
-    let child = child.ok_or(PatchError { kind: PatchErrorKind::PathNotFound })?;
+    let child = child.ok_or(PatchError {
+        kind: PatchErrorKind::PathNotFound,
+    })?;
     let decoded_child = decode_pointer_segment(child);
-    let parent = traverse_mut(root, parent_path)
-        .ok_or(PatchError { kind: PatchErrorKind::PathNotFound })?;
+    let parent = traverse_mut(root, parent_path).ok_or(PatchError {
+        kind: PatchErrorKind::PathNotFound,
+    })?;
     f(parent, &decoded_child)
 }
 
 // ---- Patch operations ----
 
-fn apply_add(root: &mut Value, path: &str, obj: &BTreeMap<String, Value>, _case_sensitive: bool) -> Result<(), PatchError> {
-    let value = get_value_field(obj, "value").ok_or(PatchError { kind: PatchErrorKind::MissingValue })?;
+fn apply_add(
+    root: &mut Value,
+    path: &str,
+    obj: &BTreeMap<String, Value>,
+    _case_sensitive: bool,
+) -> Result<(), PatchError> {
+    let value = get_value_field(obj, "value").ok_or(PatchError {
+        kind: PatchErrorKind::MissingValue,
+    })?;
     let cloned = value.clone();
 
     if path.is_empty() {
@@ -245,38 +279,49 @@ fn apply_add(root: &mut Value, path: &str, obj: &BTreeMap<String, Value>, _case_
 
     // Handle "-" for array append
     let (parent_path, child) = split_pointer(path);
-    let child = child.ok_or(PatchError { kind: PatchErrorKind::PathNotFound })?;
+    let child = child.ok_or(PatchError {
+        kind: PatchErrorKind::PathNotFound,
+    })?;
 
     if child == "-" {
-        let parent = traverse_mut(root, parent_path)
-            .ok_or(PatchError { kind: PatchErrorKind::PathNotFound })?;
+        let parent = traverse_mut(root, parent_path).ok_or(PatchError {
+            kind: PatchErrorKind::PathNotFound,
+        })?;
         match parent {
             Value::Array(ref mut arr) => {
                 arr.push(cloned);
                 Ok(())
             }
-            _ => Err(PatchError { kind: PatchErrorKind::NotAnArray }),
+            _ => Err(PatchError {
+                kind: PatchErrorKind::NotAnArray,
+            }),
         }
     } else {
         let decoded_child = decode_pointer_segment(child);
-        let parent = traverse_mut(root, parent_path)
-            .ok_or(PatchError { kind: PatchErrorKind::PathNotFound })?;
+        let parent = traverse_mut(root, parent_path).ok_or(PatchError {
+            kind: PatchErrorKind::PathNotFound,
+        })?;
         match parent {
             Value::Array(ref mut arr) => {
-                let index: usize = decoded_child.parse()
-                    .map_err(|_| PatchError { kind: PatchErrorKind::IndexOutOfBounds })?;
+                let index: usize = decoded_child.parse().map_err(|_| PatchError {
+                    kind: PatchErrorKind::IndexOutOfBounds,
+                })?;
                 if index <= arr.len() {
                     arr.insert(index, cloned);
                     Ok(())
                 } else {
-                    Err(PatchError { kind: PatchErrorKind::IndexOutOfBounds })
+                    Err(PatchError {
+                        kind: PatchErrorKind::IndexOutOfBounds,
+                    })
                 }
             }
             Value::Object(ref mut map) => {
                 map.insert(decoded_child, cloned);
                 Ok(())
             }
-            _ => Err(PatchError { kind: PatchErrorKind::PathNotFound }),
+            _ => Err(PatchError {
+                kind: PatchErrorKind::PathNotFound,
+            }),
         }
     }
 }
@@ -287,30 +332,41 @@ fn apply_remove(root: &mut Value, path: &str, _case_sensitive: bool) -> Result<(
         return Ok(());
     }
 
-    modify_child(root, path, |parent, child| {
-        match parent {
-            Value::Array(ref mut arr) => {
-                let index: usize = child.parse()
-                    .map_err(|_| PatchError { kind: PatchErrorKind::IndexOutOfBounds })?;
-                if index < arr.len() {
-                    arr.remove(index);
-                    Ok(())
-                } else {
-                    Err(PatchError { kind: PatchErrorKind::IndexOutOfBounds })
-                }
-            }
-            Value::Object(ref mut map) => {
-                map.remove(&*child)
-                    .ok_or(PatchError { kind: PatchErrorKind::PathNotFound })?;
+    modify_child(root, path, |parent, child| match parent {
+        Value::Array(ref mut arr) => {
+            let index: usize = child.parse().map_err(|_| PatchError {
+                kind: PatchErrorKind::IndexOutOfBounds,
+            })?;
+            if index < arr.len() {
+                arr.remove(index);
                 Ok(())
+            } else {
+                Err(PatchError {
+                    kind: PatchErrorKind::IndexOutOfBounds,
+                })
             }
-            _ => Err(PatchError { kind: PatchErrorKind::PathNotFound }),
         }
+        Value::Object(ref mut map) => {
+            map.remove(&*child).ok_or(PatchError {
+                kind: PatchErrorKind::PathNotFound,
+            })?;
+            Ok(())
+        }
+        _ => Err(PatchError {
+            kind: PatchErrorKind::PathNotFound,
+        }),
     })
 }
 
-fn apply_replace(root: &mut Value, path: &str, obj: &BTreeMap<String, Value>, _case_sensitive: bool) -> Result<(), PatchError> {
-    let value = get_value_field(obj, "value").ok_or(PatchError { kind: PatchErrorKind::MissingValue })?;
+fn apply_replace(
+    root: &mut Value,
+    path: &str,
+    obj: &BTreeMap<String, Value>,
+    _case_sensitive: bool,
+) -> Result<(), PatchError> {
+    let value = get_value_field(obj, "value").ok_or(PatchError {
+        kind: PatchErrorKind::MissingValue,
+    })?;
     let cloned = value.clone();
 
     if path.is_empty() {
@@ -319,15 +375,25 @@ fn apply_replace(root: &mut Value, path: &str, obj: &BTreeMap<String, Value>, _c
     }
 
     // For replace, we can just traverse to the target and replace it directly
-    let target = traverse_mut(root, path)
-        .ok_or(PatchError { kind: PatchErrorKind::PathNotFound })?;
+    let target = traverse_mut(root, path).ok_or(PatchError {
+        kind: PatchErrorKind::PathNotFound,
+    })?;
     *target = cloned;
     Ok(())
 }
 
-fn apply_move(root: &mut Value, path: &str, obj: &BTreeMap<String, Value>, _case_sensitive: bool) -> Result<(), PatchError> {
-    let from = get_string_field(obj, "from").ok_or(PatchError { kind: PatchErrorKind::InvalidPatch })?;
-    let value = detach_path(root, from).ok_or(PatchError { kind: PatchErrorKind::FromNotFound })?;
+fn apply_move(
+    root: &mut Value,
+    path: &str,
+    obj: &BTreeMap<String, Value>,
+    _case_sensitive: bool,
+) -> Result<(), PatchError> {
+    let from = get_string_field(obj, "from").ok_or(PatchError {
+        kind: PatchErrorKind::InvalidPatch,
+    })?;
+    let value = detach_path(root, from).ok_or(PatchError {
+        kind: PatchErrorKind::FromNotFound,
+    })?;
 
     if path.is_empty() {
         *root = value;
@@ -335,45 +401,65 @@ fn apply_move(root: &mut Value, path: &str, obj: &BTreeMap<String, Value>, _case
     }
 
     let (parent_path, child) = split_pointer(path);
-    let child = child.ok_or(PatchError { kind: PatchErrorKind::PathNotFound })?;
+    let child = child.ok_or(PatchError {
+        kind: PatchErrorKind::PathNotFound,
+    })?;
     let decoded_child = decode_pointer_segment(child);
 
     if child == "-" {
-        let parent = traverse_mut(root, parent_path)
-            .ok_or(PatchError { kind: PatchErrorKind::PathNotFound })?;
+        let parent = traverse_mut(root, parent_path).ok_or(PatchError {
+            kind: PatchErrorKind::PathNotFound,
+        })?;
         match parent {
             Value::Array(ref mut arr) => {
                 arr.push(value);
                 Ok(())
             }
-            _ => Err(PatchError { kind: PatchErrorKind::NotAnArray }),
+            _ => Err(PatchError {
+                kind: PatchErrorKind::NotAnArray,
+            }),
         }
     } else {
-        let parent = traverse_mut(root, parent_path)
-            .ok_or(PatchError { kind: PatchErrorKind::PathNotFound })?;
+        let parent = traverse_mut(root, parent_path).ok_or(PatchError {
+            kind: PatchErrorKind::PathNotFound,
+        })?;
         match parent {
             Value::Array(ref mut arr) => {
-                let index: usize = decoded_child.parse()
-                    .map_err(|_| PatchError { kind: PatchErrorKind::IndexOutOfBounds })?;
+                let index: usize = decoded_child.parse().map_err(|_| PatchError {
+                    kind: PatchErrorKind::IndexOutOfBounds,
+                })?;
                 if index <= arr.len() {
                     arr.insert(index, value);
                     Ok(())
                 } else {
-                    Err(PatchError { kind: PatchErrorKind::IndexOutOfBounds })
+                    Err(PatchError {
+                        kind: PatchErrorKind::IndexOutOfBounds,
+                    })
                 }
             }
             Value::Object(ref mut map) => {
                 map.insert(decoded_child, value);
                 Ok(())
             }
-            _ => Err(PatchError { kind: PatchErrorKind::PathNotFound }),
+            _ => Err(PatchError {
+                kind: PatchErrorKind::PathNotFound,
+            }),
         }
     }
 }
 
-fn apply_copy(root: &mut Value, path: &str, obj: &BTreeMap<String, Value>, _case_sensitive: bool) -> Result<(), PatchError> {
-    let from = get_string_field(obj, "from").ok_or(PatchError { kind: PatchErrorKind::InvalidPatch })?;
-    let source = get_pointer(root, from).ok_or(PatchError { kind: PatchErrorKind::FromNotFound })?;
+fn apply_copy(
+    root: &mut Value,
+    path: &str,
+    obj: &BTreeMap<String, Value>,
+    _case_sensitive: bool,
+) -> Result<(), PatchError> {
+    let from = get_string_field(obj, "from").ok_or(PatchError {
+        kind: PatchErrorKind::InvalidPatch,
+    })?;
+    let source = get_pointer(root, from).ok_or(PatchError {
+        kind: PatchErrorKind::FromNotFound,
+    })?;
     let cloned = source.clone();
 
     if path.is_empty() {
@@ -382,47 +468,69 @@ fn apply_copy(root: &mut Value, path: &str, obj: &BTreeMap<String, Value>, _case
     }
 
     let (parent_path, child) = split_pointer(path);
-    let child = child.ok_or(PatchError { kind: PatchErrorKind::PathNotFound })?;
+    let child = child.ok_or(PatchError {
+        kind: PatchErrorKind::PathNotFound,
+    })?;
     let decoded_child = decode_pointer_segment(child);
 
     if child == "-" {
-        let parent = traverse_mut(root, parent_path)
-            .ok_or(PatchError { kind: PatchErrorKind::PathNotFound })?;
+        let parent = traverse_mut(root, parent_path).ok_or(PatchError {
+            kind: PatchErrorKind::PathNotFound,
+        })?;
         match parent {
             Value::Array(ref mut arr) => {
                 arr.push(cloned);
                 Ok(())
             }
-            _ => Err(PatchError { kind: PatchErrorKind::NotAnArray }),
+            _ => Err(PatchError {
+                kind: PatchErrorKind::NotAnArray,
+            }),
         }
     } else {
-        let parent = traverse_mut(root, parent_path)
-            .ok_or(PatchError { kind: PatchErrorKind::PathNotFound })?;
+        let parent = traverse_mut(root, parent_path).ok_or(PatchError {
+            kind: PatchErrorKind::PathNotFound,
+        })?;
         match parent {
             Value::Array(ref mut arr) => {
-                let index: usize = decoded_child.parse()
-                    .map_err(|_| PatchError { kind: PatchErrorKind::IndexOutOfBounds })?;
+                let index: usize = decoded_child.parse().map_err(|_| PatchError {
+                    kind: PatchErrorKind::IndexOutOfBounds,
+                })?;
                 if index <= arr.len() {
                     arr.insert(index, cloned);
                     Ok(())
                 } else {
-                    Err(PatchError { kind: PatchErrorKind::IndexOutOfBounds })
+                    Err(PatchError {
+                        kind: PatchErrorKind::IndexOutOfBounds,
+                    })
                 }
             }
             Value::Object(ref mut map) => {
                 map.insert(decoded_child, cloned);
                 Ok(())
             }
-            _ => Err(PatchError { kind: PatchErrorKind::PathNotFound }),
+            _ => Err(PatchError {
+                kind: PatchErrorKind::PathNotFound,
+            }),
         }
     }
 }
 
-fn apply_test(root: &mut Value, path: &str, obj: &BTreeMap<String, Value>, case_sensitive: bool) -> Result<(), PatchError> {
-    let value = get_value_field(obj, "value").ok_or(PatchError { kind: PatchErrorKind::MissingValue })?;
-    let current = get_pointer(root, path).ok_or(PatchError { kind: PatchErrorKind::PathNotFound })?;
+fn apply_test(
+    root: &mut Value,
+    path: &str,
+    obj: &BTreeMap<String, Value>,
+    case_sensitive: bool,
+) -> Result<(), PatchError> {
+    let value = get_value_field(obj, "value").ok_or(PatchError {
+        kind: PatchErrorKind::MissingValue,
+    })?;
+    let current = get_pointer(root, path).ok_or(PatchError {
+        kind: PatchErrorKind::PathNotFound,
+    })?;
     if !crate::compare(current, value, case_sensitive) {
-        return Err(PatchError { kind: PatchErrorKind::TestFailed });
+        return Err(PatchError {
+            kind: PatchErrorKind::TestFailed,
+        });
     }
     Ok(())
 }
@@ -455,7 +563,10 @@ fn detach_path(root: &mut Value, path: &str) -> Option<Value> {
 
 fn generate_patches_inner(from: &Value, to: &Value, case_sensitive: bool) -> Value {
     let mut patches = Vec::new();
-    if core::mem::discriminant(from) != core::mem::discriminant(to) || from.is_null() || to.is_null() {
+    if core::mem::discriminant(from) != core::mem::discriminant(to)
+        || from.is_null()
+        || to.is_null()
+    {
         if !crate::compare(from, to, case_sensitive) {
             patches.push(create_patch_entry("replace", "", to));
         }
@@ -485,7 +596,12 @@ fn create_patch_entry(op: &str, path: &str, value: &Value) -> Value {
     Value::Object(obj)
 }
 
-fn generate_array_patches(patches: &mut Vec<Value>, from: &[Value], to: &[Value], case_sensitive: bool) {
+fn generate_array_patches(
+    patches: &mut Vec<Value>,
+    from: &[Value],
+    to: &[Value],
+    case_sensitive: bool,
+) {
     let min_len = from.len().min(to.len());
     for i in 0..min_len {
         let path = alloc::format!("/{}", i);
@@ -513,14 +629,23 @@ fn generate_array_patches(patches: &mut Vec<Value>, from: &[Value], to: &[Value]
         }
     }
     for _ in min_len..from.len() {
-        patches.push(create_patch_entry("remove", &alloc::format!("/{}", min_len), &Value::Null));
+        patches.push(create_patch_entry(
+            "remove",
+            &alloc::format!("/{}", min_len),
+            &Value::Null,
+        ));
     }
     for i in min_len..to.len() {
         patches.push(create_patch_entry("add", "/-", &to[i]));
     }
 }
 
-fn generate_object_patches(patches: &mut Vec<Value>, from: &BTreeMap<String, Value>, to: &BTreeMap<String, Value>, _case_sensitive: bool) {
+fn generate_object_patches(
+    patches: &mut Vec<Value>,
+    from: &BTreeMap<String, Value>,
+    to: &BTreeMap<String, Value>,
+    _case_sensitive: bool,
+) {
     let mut all_keys: Vec<&str> = from.keys().map(|k| k.as_str()).collect();
     for key in to.keys() {
         if !from.contains_key(key) {
@@ -561,10 +686,18 @@ fn generate_object_patches(patches: &mut Vec<Value>, from: &BTreeMap<String, Val
                 }
             }
             (Some(_), None) => {
-                patches.push(create_patch_entry("remove", &alloc::format!("/{}", encode_pointer_segment(key)), &Value::Null));
+                patches.push(create_patch_entry(
+                    "remove",
+                    &alloc::format!("/{}", encode_pointer_segment(key)),
+                    &Value::Null,
+                ));
             }
             (None, Some(to_val)) => {
-                patches.push(create_patch_entry("add", &alloc::format!("/{}", encode_pointer_segment(key)), to_val));
+                patches.push(create_patch_entry(
+                    "add",
+                    &alloc::format!("/{}", encode_pointer_segment(key)),
+                    to_val,
+                ));
             }
             (None, None) => unreachable!(),
         }

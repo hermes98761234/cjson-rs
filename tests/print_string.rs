@@ -3,7 +3,10 @@ use cjson::{to_string_minified, Value};
 fn assert_print_string(expected: &str, input: &str) {
     let v = Value::String(input.into());
     let printed = to_string_minified(&v);
-    assert_eq!(printed, expected, "Printed string doesn't match expected for input: {input:?}");
+    assert_eq!(
+        printed, expected,
+        "Printed string doesn't match expected for input: {input:?}"
+    );
 }
 
 #[test]

@@ -1,6 +1,6 @@
+use crate::Value;
 use alloc::string::String;
 use alloc::vec::Vec;
-use crate::Value;
 
 /// Retrieve a value from a JSON document using a JSON Pointer (RFC 6901).
 ///
@@ -36,7 +36,11 @@ pub fn find_pointer_from_object_to<'a>(root: &'a Value, target: &Value) -> Optio
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-fn get_item_from_pointer<'a>(root: &'a Value, pointer: &str, _case_sensitive: bool) -> Option<&'a Value> {
+fn get_item_from_pointer<'a>(
+    root: &'a Value,
+    pointer: &str,
+    _case_sensitive: bool,
+) -> Option<&'a Value> {
     if pointer.is_empty() {
         return Some(root);
     }
@@ -102,7 +106,11 @@ fn parse_array_index(segment: &str) -> Option<usize> {
     segment.parse::<usize>().ok()
 }
 
-fn find_pointer_recursive<'a>(root: &'a Value, target: &Value, _child_index: &mut usize) -> Option<String> {
+fn find_pointer_recursive<'a>(
+    root: &'a Value,
+    target: &Value,
+    _child_index: &mut usize,
+) -> Option<String> {
     if core::ptr::eq(root, target) {
         return Some(String::new());
     }
@@ -221,7 +229,10 @@ mod tests {
         let v = parse_json(r#"{"Foo": 1}"#);
         assert!(get_pointer(&v, "/foo").is_none());
         assert_eq!(get_pointer(&v, "/Foo").unwrap().as_f64(), Some(1.0));
-        assert_eq!(get_pointer_case_sensitive(&v, "/Foo").unwrap().as_f64(), Some(1.0));
+        assert_eq!(
+            get_pointer_case_sensitive(&v, "/Foo").unwrap().as_f64(),
+            Some(1.0)
+        );
     }
 
     #[test]

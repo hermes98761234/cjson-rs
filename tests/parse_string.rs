@@ -15,7 +15,10 @@ fn parse_string_printable() {
 #[test]
 fn parse_string_escapes() {
     let input = r#""\"\\\/\b\f\n\r\t\u20AC\u732b""#;
-    assert_eq!(parse(input).unwrap().as_str(), Some("\"\\/\u{8}\u{c}\n\r\t\u{20ac}\u{732b}"));
+    assert_eq!(
+        parse(input).unwrap().as_str(),
+        Some("\"\\/\u{8}\u{c}\n\r\t\u{20ac}\u{732b}")
+    );
 }
 
 #[test]

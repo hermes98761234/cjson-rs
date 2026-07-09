@@ -3,7 +3,10 @@ use cjson::parse;
 fn assert_number(input: &str, expected_int: i64, expected_double: f64) {
     let v = parse(input).unwrap();
     assert!(v.is_number());
-    if expected_double.fract() == 0.0 && expected_double >= i64::MIN as f64 && expected_double <= i64::MAX as f64 {
+    if expected_double.fract() == 0.0
+        && expected_double >= i64::MIN as f64
+        && expected_double <= i64::MAX as f64
+    {
         assert_eq!(v.as_i64(), Some(expected_int));
     }
     assert!((v.as_f64().unwrap() - expected_double).abs() < 1e-10);
@@ -69,7 +72,7 @@ fn parse_big_numbers() {
 #[test]
 fn parse_number_pi() {
     let v = parse("3.141592653589793").unwrap();
-    assert!((v.as_f64().unwrap() - 3.141592653589793).abs() < 1e-15);
+    assert!((v.as_f64().unwrap() - std::f64::consts::PI).abs() < 1e-15);
 }
 
 #[test]

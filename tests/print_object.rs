@@ -6,30 +6,28 @@ fn assert_print_object(expected_formatted: &str, expected_minified: &str, input:
 
     // BTreeMap sorts keys, so minified will have sorted keys
     let minified = to_string_minified(&parsed);
-    assert_eq!(minified, expected_minified, "Minified object is not correct");
+    assert_eq!(
+        minified, expected_minified,
+        "Minified object is not correct"
+    );
 
     // Pretty-printed
     let formatted = to_string(&parsed);
-    assert_eq!(formatted, expected_formatted, "Formatted object is not correct");
+    assert_eq!(
+        formatted, expected_formatted,
+        "Formatted object is not correct"
+    );
 }
 
 #[test]
 fn print_object_should_print_empty_objects() {
     // Empty objects print compact even in pretty mode
-    assert_print_object(
-        "{}",
-        "{}",
-        "{}",
-    );
+    assert_print_object("{}", "{}", "{}");
 }
 
 #[test]
 fn print_object_should_print_objects_with_one_element() {
-    assert_print_object(
-        "{\n  \"one\": 1\n}",
-        r#"{"one":1}"#,
-        r#"{"one":1}"#,
-    );
+    assert_print_object("{\n  \"one\": 1\n}", r#"{"one":1}"#, r#"{"one":1}"#);
     assert_print_object(
         "{\n  \"hello\": \"world!\"\n}",
         r#"{"hello":"world!"}"#,

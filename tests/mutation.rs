@@ -257,7 +257,12 @@ fn delete_item_from_array_should_not_broken_list() {
 
     rd.push(item1);
     assert_eq!(rd.len(), 1);
-    assert_eq!(rd.get_index(0).and_then(|v| v.get("a")).and_then(|v| v.as_str()), Some("123"));
+    assert_eq!(
+        rd.get_index(0)
+            .and_then(|v| v.get("a"))
+            .and_then(|v| v.as_str()),
+        Some("123")
+    );
 
     rd.push(item2);
     assert_eq!(rd.len(), 2);
@@ -266,5 +271,10 @@ fn delete_item_from_array_should_not_broken_list() {
     let removed = rd.remove_index(0);
     assert!(removed.is_some());
     assert_eq!(rd.len(), 1);
-    assert_eq!(rd.get_index(0).and_then(|v| v.get("b")).and_then(|v| v.as_str()), Some("456"));
+    assert_eq!(
+        rd.get_index(0)
+            .and_then(|v| v.get("b"))
+            .and_then(|v| v.as_str()),
+        Some("456")
+    );
 }

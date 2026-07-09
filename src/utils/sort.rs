@@ -1,6 +1,6 @@
+use crate::Value;
 use alloc::string::String;
 use alloc::vec::Vec;
-use crate::Value;
 
 /// Recursively sort the keys of all objects in a JSON value.
 pub fn sort_object(value: &mut Value) {
@@ -59,13 +59,27 @@ mod tests {
         sort_object(&mut v);
         let outer_keys: Vec<&str> = v.as_object().unwrap().keys().map(|k| k.as_str()).collect();
         assert_eq!(outer_keys, vec!["a", "z"]);
-        let inner_keys_a: Vec<&str> = v.as_object().unwrap()
-            .get("a").unwrap().as_object().unwrap()
-            .keys().map(|k| k.as_str()).collect();
+        let inner_keys_a: Vec<&str> = v
+            .as_object()
+            .unwrap()
+            .get("a")
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .keys()
+            .map(|k| k.as_str())
+            .collect();
         assert_eq!(inner_keys_a, vec!["c", "d"]);
-        let inner_keys_z: Vec<&str> = v.as_object().unwrap()
-            .get("z").unwrap().as_object().unwrap()
-            .keys().map(|k| k.as_str()).collect();
+        let inner_keys_z: Vec<&str> = v
+            .as_object()
+            .unwrap()
+            .get("z")
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .keys()
+            .map(|k| k.as_str())
+            .collect();
         assert_eq!(inner_keys_z, vec!["a", "b"]);
     }
 }

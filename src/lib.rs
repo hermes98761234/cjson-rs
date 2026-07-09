@@ -6,21 +6,22 @@ extern crate alloc;
 #[cfg(feature = "std")]
 extern crate std;
 
-mod value;
+pub mod compare;
 mod error;
+mod minify;
 mod parse;
 mod print;
-pub mod compare;
 mod raw;
-mod minify;
+mod value;
 
-#[cfg(feature = "utils")]
-pub mod utils;
 #[cfg(feature = "serde")]
 mod serde_impl;
+#[cfg(feature = "utils")]
+pub mod utils;
 
-pub use value::{Value, Number};
+pub use compare::compare;
 pub use error::{Error, ErrorKind};
+pub use minify::minify;
 #[cfg(feature = "std")]
 pub use parse::from_reader;
 pub use parse::{parse, parse_with_options, ParseOptions};
@@ -28,7 +29,8 @@ pub use parse::{parse, parse_with_options, ParseOptions};
 pub use print::to_writer;
 pub use print::{to_string, to_string_minified, to_string_with_options, PrintOptions};
 pub use raw::RawValue;
-pub use minify::minify;
-pub use compare::compare;
+pub use value::{Number, Value};
 
-pub const fn version() -> &'static str { "0.1.0" }
+pub const fn version() -> &'static str {
+    "0.1.0"
+}

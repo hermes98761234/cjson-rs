@@ -3,7 +3,10 @@ use cjson::{parse, to_string_minified};
 fn assert_print_value(input: &str) {
     let parsed = parse(input).expect("Failed to parse value");
     let printed = to_string_minified(&parsed);
-    assert_eq!(printed, input, "Printed value is not as expected for input: {input}");
+    assert_eq!(
+        printed, input,
+        "Printed value is not as expected for input: {input}"
+    );
 }
 
 #[test]

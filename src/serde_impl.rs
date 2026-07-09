@@ -170,10 +170,7 @@ mod tests {
             Value::Number(Number(1.0)),
             Value::Null,
         ]);
-        assert_eq!(
-            serde_json::to_string(&v).unwrap(),
-            "[true,1.0,null]"
-        );
+        assert_eq!(serde_json::to_string(&v).unwrap(), "[true,1.0,null]");
     }
 
     #[test]
@@ -190,12 +187,12 @@ mod tests {
     #[test]
     fn serialize_nested() {
         let mut inner = BTreeMap::new();
-        inner.insert("x".into(), Value::Array(vec![Value::Null, Value::Bool(false)]));
-        let v = Value::Object(inner);
-        assert_eq!(
-            serde_json::to_string(&v).unwrap(),
-            r#"{"x":[null,false]}"#
+        inner.insert(
+            "x".into(),
+            Value::Array(vec![Value::Null, Value::Bool(false)]),
         );
+        let v = Value::Object(inner);
+        assert_eq!(serde_json::to_string(&v).unwrap(), r#"{"x":[null,false]}"#);
     }
 
     #[test]
@@ -252,7 +249,10 @@ mod tests {
     fn deserialize_nested() {
         let v: Value = serde_json::from_str(r#"{"x": [null, false]}"#).unwrap();
         let mut expected = BTreeMap::new();
-        expected.insert("x".into(), Value::Array(vec![Value::Null, Value::Bool(false)]));
+        expected.insert(
+            "x".into(),
+            Value::Array(vec![Value::Null, Value::Bool(false)]),
+        );
         assert_eq!(v, Value::Object(expected));
     }
 

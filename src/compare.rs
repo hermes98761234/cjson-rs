@@ -18,7 +18,9 @@ pub fn compare(a: &Value, b: &Value, case_sensitive: bool) -> bool {
             if a.len() != b.len() {
                 return false;
             }
-            a.iter().zip(b.iter()).all(|(x, y)| compare(x, y, case_sensitive))
+            a.iter()
+                .zip(b.iter())
+                .all(|(x, y)| compare(x, y, case_sensitive))
         }
         (Value::Object(a), Value::Object(b)) => compare_objects(a, b, case_sensitive),
         _ => false,
@@ -50,7 +52,8 @@ fn compare_objects(
     } else {
         // Case-insensitive key matching
         // Build a map of lowercase key -> original key for 'b'
-        let b_lower: BTreeMap<String, String> = b.keys().map(|k| (k.to_lowercase(), k.clone())).collect();
+        let b_lower: BTreeMap<String, String> =
+            b.keys().map(|k| (k.to_lowercase(), k.clone())).collect();
 
         for (key_a, val_a) in a.iter() {
             let lower_a = key_a.to_lowercase();
@@ -140,8 +143,16 @@ mod tests {
         ));
         assert!(compare_from_string("[[[1], 2]]", "[[[1], 2]]", true));
         assert!(compare_from_string("[[[1], 2]]", "[[[1], 2]]", false));
-        assert!(!compare_from_string("[true,null,42,\"string\",[],{}]", "[false, true, null, 42, \"string\", [], {}]", true));
-        assert!(!compare_from_string("[true,null,42,\"string\",[],{}]", "[false, true, null, 42, \"string\", [], {}]", false));
+        assert!(!compare_from_string(
+            "[true,null,42,\"string\",[],{}]",
+            "[false, true, null, 42, \"string\", [], {}]",
+            true
+        ));
+        assert!(!compare_from_string(
+            "[true,null,42,\"string\",[],{}]",
+            "[false, true, null, 42, \"string\", [], {}]",
+            false
+        ));
         // Different length
         assert!(!compare_from_string("[1,2,3]", "[1,2]", true));
         assert!(!compare_from_string("[1,2,3]", "[1,2]", false));
