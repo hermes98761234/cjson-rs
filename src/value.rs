@@ -25,6 +25,8 @@ impl Value {
 
     pub fn is_null(&self) -> bool { matches!(self, Value::Null) }
     pub fn is_bool(&self) -> bool { matches!(self, Value::Bool(_)) }
+    pub fn is_true(&self) -> bool { matches!(self, Value::Bool(true)) }
+    pub fn is_false(&self) -> bool { matches!(self, Value::Bool(false)) }
     pub fn is_number(&self) -> bool { matches!(self, Value::Number(_)) }
     pub fn is_string(&self) -> bool { matches!(self, Value::String(_)) }
     pub fn is_array(&self) -> bool { matches!(self, Value::Array(_)) }
@@ -49,6 +51,44 @@ impl Value {
     pub fn push(&mut self, v: Value) { if let Value::Array(ref mut a)=self{a.push(v)} }
     pub fn insert(&mut self, key: impl Into<String>, v: Value) { if let Value::Object(ref mut m)=self{m.insert(key.into(),v);} }
     pub fn has_key(&self, key: &str) -> bool { matches!(self, Value::Object(m) if m.contains_key(key)) }
+
+    /// Remove an element from an array at the given index. Returns the removed value, or None if out of bounds or wrong type.
+    pub fn remove_index(&mut self, index: usize) -> Option<Value> {
+        if let Value::Array(ref mut v) = self {
+            if index < v.len() { Some(v.remove(index)) } else { None }
+        } else { None }
+    }
+
+    /// Remove a key from an object. Returns the removed value, or None if key not found or wrong type.
+    pub fn remove_key(&mut self, key: &str) -> Option<Value> {
+        if let Value::Object(ref mut m) = self {
+            m.remove(key)
+        } else { None }
+    }
+
+    /// Insert a value into an array at the given index. Panics if index > len.
+    pub fn insert_in_array(&mut self, index: usize, value: Value) {
+        if let Value::Array(ref mut v) = self {
+            if index <= v.len() { v.insert(index, value); }
+        }
+    }
+
+    /// Replace an element in an array at the given index. Returns the old value, or None if out of bounds or wrong type.
+    pub fn replace_index(&mut self, index: usize, value: Value) -> Option<Value> {
+        if let Value::Array(ref mut v) = self {
+            if index < v.len() {
+                let old = core::mem::replace(&mut v[index], value);
+                Some(old)
+            } else { None }
+        } else { None }
+    }
+
+    /// Replace a value in an object by key. Returns the old value, or None if key not found or wrong type.
+    pub fn replace_key(&mut self, key: &str, value: Value) -> Option<Value> {
+        if let Value::Object(ref mut m) = self {
+            m.insert(key.to_string(), value)
+        } else { None }
+    }
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
