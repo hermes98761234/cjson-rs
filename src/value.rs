@@ -1,5 +1,6 @@
 use alloc::collections::BTreeMap;
 use alloc::string::String;
+use alloc::string::ToString;
 use alloc::vec::Vec;
 use core::fmt;
 
@@ -99,9 +100,11 @@ impl Number {
     pub fn from_i64(n: i64) -> Self { Number(n as f64) }
     pub fn as_f64(&self) -> f64 { self.0 }
     pub fn as_i64(&self) -> Option<i64> {
-        if self.0.fract()==0.0 && self.0>=i64::MIN as f64 && self.0<=i64::MAX as f64 { Some(self.0 as i64) } else { None }
+        if self.0>=i64::MIN as f64 && self.0<=i64::MAX as f64 && (self.0 as i64) as f64==self.0 { Some(self.0 as i64) } else { None }
     }
-    pub fn is_integer(&self) -> bool { self.0.fract()==0.0 }
+    pub fn is_integer(&self) -> bool {
+        self.0>=i64::MIN as f64 && self.0<=i64::MAX as f64 && (self.0 as i64) as f64==self.0
+    }
 }
 impl From<f64> for Number { fn from(n: f64) -> Self { Number(n) } }
 impl From<i64> for Number { fn from(n: i64) -> Self { Number(n as f64) } }

@@ -1,3 +1,5 @@
+use alloc::string::String;
+
 pub fn minify(input: &str) -> String {
     // Remove whitespace outside strings
     let mut out = alloc::string::String::with_capacity(input.len());

@@ -13,7 +13,7 @@ utils = ["std"]
 serde = ["dep:serde"]
 
 [dependencies]
-serde = { version = "1", optional = true, features = ["derive"] }
+serde = { version = "1", optional = true, default-features = false, features = ["derive", "alloc"] }
 
 [dev-dependencies]
 proptest = "1"
